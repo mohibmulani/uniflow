@@ -972,7 +972,8 @@
 
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px 16px 40px;
+        padding: 92px 16px 40px;
+        /* 72px navbar + 20px spacing */
     }
 
     .dashboard-header {
