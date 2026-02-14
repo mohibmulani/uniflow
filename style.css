@@ -1,6 +1,6 @@
 :root {
   /* ============================================
-     UNIFLOW DESIGN SYSTEM
+     EV OVERSEAS DESIGN SYSTEM
      Minimalist Tech Theme - "Anti-Agent" Style
      ============================================ */
 
@@ -57,14 +57,14 @@
   --color-warning: var(--color-urgency);
   --color-error: #EF4444;
 
-  /* Legacy Support - Updated for UniFlow */
+  /* Legacy Support - Updated for EV OVERSEAS */
   --color-primary-navy: #0A2342;
   --color-primary-orange: var(--color-urgency);
   --color-purple-light: #F0FDFA;
   /* Light cyan tint for alternating sections */
   --color-purple-footer: #0A2342;
 
-  /* Typography - UniFlow Style */
+  /* Typography - EV OVERSEAS Style */
   --font-heading: 'Montserrat', sans-serif;
   --font-body: 'Open Sans', sans-serif;
 
@@ -612,7 +612,7 @@ select.form-control {
 
 
 /* END PERPLEXITY DESIGN SYSTEM */
-/* Custom styles for UniFlow website */
+/* Custom styles for EV OVERSEAS website */
 
 /* Smooth scrolling */
 html {
@@ -738,8 +738,15 @@ section:nth-child(even) {
   color: var(--color-primary);
 }
 
-.nav-cta {
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-left: 16px;
+}
+
+.nav-cta {
+  margin-left: 0;
 }
 
 .hamburger {
@@ -4705,7 +4712,7 @@ button,
 }
 
 /* ============================================
-   UNIFLOW SPECIFIC STYLES
+   EV OVERSEAS SPECIFIC STYLES
    ============================================ */
 
 /* Rebrand Announcement Banner */
@@ -4879,12 +4886,12 @@ button,
   border-color: var(--color-gray-300);
 }
 
-.comparison-column.uniflow-way {
+.comparison-column.EV OVERSEAS-way {
   border-color: var(--color-accent);
   background: linear-gradient(180deg, rgba(0, 180, 216, 0.03) 0%, var(--color-white) 100%);
 }
 
-.comparison-column.uniflow-way::before {
+.comparison-column.EV OVERSEAS-way::before {
   content: '✓ RECOMMENDED';
   display: block;
   background: var(--gradient-button);
@@ -4954,7 +4961,7 @@ button,
   color: #EF4444;
 }
 
-.comparison-column.uniflow-way .comparison-icon {
+.comparison-column.EV OVERSEAS-way .comparison-icon {
   background: rgba(0, 180, 216, 0.1);
   color: var(--color-accent);
 }
@@ -5028,7 +5035,7 @@ button,
   margin: 0;
 }
 
-/* Updated Hero for UniFlow */
+/* Updated Hero for EV OVERSEAS */
 .hero {
   background: var(--gradient-hero);
   position: relative;
@@ -5185,7 +5192,7 @@ button,
 }
 
 /* ============================================
-   END UNIFLOW SPECIFIC STYLES
+   END EV OVERSEAS SPECIFIC STYLES
    ============================================ */
 
 /* ============================================

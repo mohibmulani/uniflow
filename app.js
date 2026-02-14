@@ -1,4 +1,4 @@
-// UniFlow Website JavaScript
+// EV Overseas Website JavaScript
 
 document.addEventListener('DOMContentLoaded', function () {
     // ============================================
@@ -475,7 +475,7 @@ async function submitFormToGoogleSheets(data) {
     1. CREATE GOOGLE SHEET:
        - Go to https://sheets.google.com
        - Click "+" to create new sheet
-       - Name it "UniFlow - Contact Forms"
+       - Name it "EV Overseas - Contact Forms"
        - In row 1, add these headers: Name | Email | Phone | Destination | Course | Message | Timestamp
     
     2. SET UP GOOGLE APPS SCRIPT:
@@ -525,7 +525,7 @@ async function submitFormToGoogleSheets(data) {
        // Send email notification
        GmailApp.sendEmail(
          'info@evoverseas.com',
-         'New Contact Form Submission - UniFlow',
+         'New Contact Form Submission - EV Overseas',
          `New inquiry received:\n\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nDestination: ${data.destination}\nCourse: ${data.course}\nMessage: ${data.message}`
        );
     */

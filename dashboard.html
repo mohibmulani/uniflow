@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Dashboard | EV Overseas - Track Your Application</title>
+    <meta name="description"
+        content="Track your study abroad application progress in real-time. View documents, milestones, and connect with your counselor.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./images/logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./images/logo.png">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#F8FAFC">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Main Site Stylesheet (shared navbar/reset) -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Dashboard Stylesheet -->
+    <link rel="stylesheet" href="dashboard.css">
+
+    <!-- Google Identity Services (Sign In with Google) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Chart.js (CDN — Free) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Critical inline styles to prevent FOUC -->
+    <style>
+        html {
+            background: #F8FAFC;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #F8FAFC;
+            min-height: 100vh;
+        }
+
+        /* Hide all screens initially — JS reveals the right one */
+        #loginScreen,
+        #loadingScreen,
+        #dashboardScreen,
+        #errorScreen {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+    <!-- ═══════════════════════════════════════════════
+         NAVIGATION BAR  (consistent with main site)
+         ═══════════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" class="nav-brand-link">
+                    <img src="./images/logo.png" alt="EV Overseas" class="nav-logo-img" loading="lazy">
+                </a>
+                <div class="nav-brand-text">
+                    <a href="index.html" class="nav-logo">EV Overseas</a>
+                    <span class="nav-tagline">Your Automated Path to a Global Career</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#services" class="nav-link">Services</a></li>
+                <li><a href="index.html#destinations" class="nav-link">Destinations</a></li>
+                <li><a href="index.html#blog" class="nav-link">Blog</a></li>
+                <li><a href="index.html#faq" class="nav-link">FAQ</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="dashboard.html" class="btn btn--black btn--sm nav-dashboard-btn">Dashboard</a>
+                <button class="btn btn--primary nav-cta" onclick="window.location.href='index.html#contact'">Get Free
+                    Roadmap</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════
+         LOGIN SCREEN
+         ═══════════════════════════════════════════════ -->
+    <div id="loginScreen" class="login-screen" style="display: flex;">
+        <div class="login-card">
+            <img src="./images/logo.png" alt="EV Overseas" class="login-logo">
+            <h1>Student Dashboard</h1>
+            <p class="login-subtitle">
+                Sign in with your Google account to track your application progress, documents, and milestones in
+                real-time.
+            </p>
+
+            <div class="google-signin-wrapper">
+                <button id="customGoogleBtn" class="custom-google-btn" type="button">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                        </path>
+                        <path fill="#4285F4"
+                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                        </path>
+                        <path fill="#FBBC05"
+                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                        </path>
+                        <path fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                        </path>
+                    </svg>
+                    Sign in with Google
+                </button>
+            </div>
+
+            <!-- Fallback for One Tap blocked scenarios -->
+            <div id="googleSignInFallback" style="display: none;"></div>
+
+            <div class="login-features">
+                <div class="login-feature">
+                    <span class="login-feature-icon">📊</span>
+                    <span>Real-time application tracking</span>
+                </div>
+                <div class="login-feature">
+                    <span class="login-feature-icon">📄</span>
+                    <span>Document status at a glance</span>
+                </div>
+                <div class="login-feature">
+                    <span class="login-feature-icon">💬</span>
+                    <span>Direct counselor access</span>
+                </div>
+                <div class="login-feature">
+                    <span class="login-feature-icon">🔒</span>
+                    <span>Secured with Google authentication</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         LOADING SCREEN
+         ═══════════════════════════════════════════════ -->
+    <div id="loadingScreen" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading your dashboard...</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         ERROR / NOT REGISTERED SCREEN
+         ═══════════════════════════════════════════════ -->
+    <div id="errorScreen" class="error-screen">
+        <div id="errorIcon" class="error-icon">⚠️</div>
+        <h2 id="errorTitle">Something went wrong</h2>
+        <p id="errorMessage">An error occurred while loading your dashboard.</p>
+        <button id="retryBtn" class="btn-retry" onclick="location.reload()">Try Again</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         DASHBOARD SCREEN
+         ═══════════════════════════════════════════════ -->
+    <div id="dashboardScreen">
+        <div class="dashboard-container">
+
+            <!-- Dashboard Header -->
+            <div class="dashboard-header fade-in">
+                <div class="welcome-section">
+                    <h1 id="welcomeName">Welcome back!</h1>
+                    <div id="welcomeMeta" class="welcome-meta"></div>
+                </div>
+                <div class="header-actions">
+                    <img id="userAvatar" class="user-avatar" src="" alt="Profile" style="display: none;">
+                    <button class="btn-signout" onclick="signOut()">
+                        <span>🚪</span> Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Overview Cards -->
+            <div id="statusCards" class="status-overview"></div>
+
+            <!-- Progress Tracker -->
+            <div class="progress-section fade-in">
+                <div class="section-title">
+                    <span class="section-title-icon">🚀</span> Application Progress
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-track">
+                        <div id="progressFill" class="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <div id="progressPercent" class="progress-percentage">0% Complete</div>
+                </div>
+                <div id="stepsGrid" class="steps-grid"></div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="dashboard-grid">
+
+                <!-- Left: Documents + Chart -->
+                <div>
+                    <!-- Progress Doughnut Chart -->
+                    <div class="documents-section fade-in" style="margin-bottom: 24px;">
+                        <div class="section-title">
+                            <span class="section-title-icon">📈</span> Progress Overview
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="progressChartCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="documents-section fade-in">
+                        <div class="section-title">
+                            <span class="section-title-icon">📄</span> Documents
+                        </div>
+                        <div id="documentsList" class="doc-list"></div>
+                    </div>
+                </div>
+
+                <!-- Right: Timeline + Counselor -->
+                <div>
+                    <!-- Milestone Timeline -->
+                    <div class="timeline-section fade-in" style="margin-bottom: 24px;">
+                        <div class="section-title">
+                            <span class="section-title-icon">📅</span> Milestone Timeline
+                        </div>
+                        <div id="timelineContainer" class="timeline"></div>
+                    </div>
+
+                    <!-- Counselor Contact -->
+                    <div class="counselor-section fade-in">
+                        <div class="section-title">
+                            <span class="section-title-icon">👤</span> Your Counselor
+                        </div>
+                        <div id="counselorContainer"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dashboard Footer -->
+            <footer class="dashboard-footer">
+                <p>© 2026 <a href="index.html">EV Overseas</a> — Your Automated Path to a Global Career</p>
+                <p style="margin-top: 4px;">Need help? Call <a href="tel:+919666963756">+91 96669 63756</a> or email <a
+                        href="mailto:info@evoverseas.com">info@evoverseas.com</a></p>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Dashboard JavaScript -->
+    <script src="dashboard.js"></script>
+
+    <!-- Mobile Navigation (same as main site) -->
+    <script>
+        // Simple mobile nav toggle for dashboard page
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', function () {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close menu when clicking a link
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

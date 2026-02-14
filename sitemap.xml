@@ -5,15 +5,15 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-    <!-- UniFlow Main Pages -->
+    <!-- EV Overseas Main Pages -->
     <url>
         <loc>https://evoverseas.com/</loc>
         <lastmod>2026-02-03</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
         <image:image>
-            <image:loc>https://evoverseas.com/images/uniflow-logo.png</image:loc>
-            <image:title>UniFlow - Transparent Study Abroad Consulting</image:title>
+            <image:loc>https://evoverseas.com/images/logo.png</image:loc>
+            <image:title>EV Overseas - Transparent Study Abroad Consulting</image:title>
         </image:image>
     </url>
 
@@ -80,6 +80,14 @@
         <lastmod>2026-02-03</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
+    </url>
+
+    <!-- Student Dashboard -->
+    <url>
+        <loc>https://evoverseas.com/dashboard.html</loc>
+        <lastmod>2026-02-10</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
 
 </urlset>
