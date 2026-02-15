@@ -1,223 +1,201 @@
-/**
- * ============================================================
- * EV OVERSEAS — Student Dashboard Backend (Google Apps Script)
- * ============================================================
- * 
- * INSTRUCTIONS:
- * 1. Open your Google Sheet → Extensions → Apps Script
- * 2. Delete any existing code in Code.gs
- * 3. Paste this entire file content into Code.gs
- * 4. Click Deploy → New Deployment → Web App
- *    - Execute as: Me
- *    - Who has access: Anyone
- * 5. Copy the Web App URL and paste it into dashboard.js (APPS_SCRIPT_URL variable)
- * 
- * GOOGLE SHEET TABS REQUIRED:
- * - Tab 1: "Students"   → Headers: Email, Name, Phone, Destination, University, Course, Intake, CurrentStep, OverallStatus, CounselorName, CounselorEmail, StartDate, Notes
- * - Tab 2: "Milestones" → Headers: Email, StepNumber, StepName, Status, Date, Notes
- * - Tab 3: "Documents"  → Headers: Email, DocumentName, Status, SubmittedDate, Notes
- */
+/* ============================================================
+   EV OVERSEAS — Google Apps Script Backend (Multi-Application)
+   Handles multiple university applications per student
+   ============================================================ */
 
-// ── Main Entry Point ──────────────────────────────────────────
+/**
+ * Serves the API for the student dashboard
+ * Fetches student profile and all their applications
+ * Each student can have multiple university applications
+ * 
+ * @param {Object} e - Request parameters
+ * @param {string} e.parameter.email - Student's email address
+ * @returns {Object} JSON response with student data and applications
+ */
 function doGet(e) {
-    // Set CORS headers for cross-origin requests
-    var output = ContentService.createTextOutput();
+    // Enable CORS for cross-origin requests
+    const output = ContentService.createTextOutput();
     output.setMimeType(ContentService.MimeType.JSON);
 
     try {
-        var email = e.parameter.email;
-        var action = e.parameter.action || 'getAll';
+        // Get email from request parameter
+        const email = e.parameter.email;
 
         if (!email) {
-            output.setContent(JSON.stringify({
-                success: false,
-                error: 'Email parameter is required'
+            return output.setContent(JSON.stringify({
+                error: 'Email parameter is required',
+                message: 'Please provide an email address'
             }));
-            return output;
         }
 
-        // Normalize email to lowercase
-        email = email.toLowerCase().trim();
+        const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-        var result;
+        // ============================================
+        // STEP 1: Get Student Profile
+        // ============================================
+        const studentSheet = ss.getSheetByName('Students');
 
-        switch (action) {
-            case 'getStudent':
-                result = getStudentData(email);
-                break;
-            case 'getMilestones':
-                result = getMilestones(email);
-                break;
-            case 'getDocuments':
-                result = getDocuments(email);
-                break;
-            case 'getAll':
-            default:
-                result = getAllData(email);
-                break;
+        if (!studentSheet) {
+            return output.setContent(JSON.stringify({
+                error: 'Configuration Error',
+                message: 'Students tab not found in Google Sheet'
+            }));
         }
 
-        output.setContent(JSON.stringify(result));
-        return output;
+        const studentData = studentSheet.getDataRange().getValues();
+        const studentHeaders = studentData[0]; // First row is headers
+        const studentRows = studentData.slice(1); // Data starts from row 2
+
+        // Find student by email
+        const studentRow = studentRows.find(row => row[0] === email);
+
+        if (!studentRow) {
+            return output.setContent(JSON.stringify({
+                error: 'Account Not Found',
+                message: 'No account found for ' + email + '. Please contact your counselor.',
+                email: email
+            }));
+        }
+
+        // Build student profile object
+        const student = {
+            email: studentRow[0],
+            name: studentRow[1],
+            phone: studentRow[2],
+            counselorName: studentRow[3],
+            counselorEmail: studentRow[4],
+            counselorPhone: studentRow[5],
+            registrationDate: formatDate(studentRow[6]),
+            notes: studentRow[7] || ''
+        };
+
+        // ============================================
+        // STEP 2: Get All Applications for This Student
+        // ============================================
+        const appSheet = ss.getSheetByName('Applications');
+
+        if (!appSheet) {
+            return output.setContent(JSON.stringify({
+                error: 'Configuration Error',
+                message: 'Applications tab not found in Google Sheet'
+            }));
+        }
+
+        const appData = appSheet.getDataRange().getValues();
+        const appHeaders = appData[0];
+        const appRows = appData.slice(1);
+
+        // Filter applications by student email
+        const applications = appRows
+            .filter(row => row[0] === email)
+            .map(row => ({
+                applicationId: row[1],
+                country: row[2],
+                university: row[3],
+                course: row[4],
+                intake: row[5],
+                currentStep: parseInt(row[6]) || 1,
+                overallStatus: row[7] || 'Active',
+                startDate: formatDate(row[8]),
+                lastUpdated: formatDate(row[9]),
+                notes: row[10] || ''
+            }));
+
+        if (applications.length === 0) {
+            return output.setContent(JSON.stringify({
+                error: 'No Applications Found',
+                message: 'You don\'t have any university applications yet. Please contact your counselor.',
+                student: student
+            }));
+        }
+
+        // ============================================
+        // STEP 3: Get Milestones for Each Application
+        // ============================================
+        const milestoneSheet = ss.getSheetByName('Milestones');
+        const milestoneData = milestoneSheet ? milestoneSheet.getDataRange().getValues() : [];
+        const milestoneRows = milestoneData.slice(1);
+
+        // ============================================
+        // STEP 4: Get Documents for Each Application
+        // ============================================
+        const docSheet = ss.getSheetByName('Documents');
+        const docData = docSheet ? docSheet.getDataRange().getValues() : [];
+        const docRows = docData.slice(1);
+
+        // Attach milestones and documents to each application
+        applications.forEach(app => {
+            // Get milestones for this specific application
+            app.milestones = milestoneRows
+                .filter(row => row[0] === app.applicationId)
+                .map(row => ({
+                    stepNumber: parseInt(row[1]) || 0,
+                    stepName: row[2],
+                    status: row[3],
+                    date: formatDate(row[4]),
+                    notes: row[5] || ''
+                }))
+                .sort((a, b) => a.stepNumber - b.stepNumber);
+
+            // Get documents for this specific application
+            app.documents = docRows
+                .filter(row => row[0] === app.applicationId)
+                .map(row => ({
+                    name: row[1],
+                    status: row[2],
+                    submittedDate: formatDate(row[3]),
+                    notes: row[4] || ''
+                }));
+
+            // Calculate progress percentage
+            const completedSteps = app.milestones.filter(m => m.status === 'Completed').length;
+            const totalSteps = 6; // As defined in JOURNEY_STEPS
+            app.progressPercentage = Math.round((completedSteps / totalSteps) * 100);
+        });
+
+        // ============================================
+        // Return Success Response
+        // ============================================
+        return output.setContent(JSON.stringify({
+            success: true,
+            student: student,
+            applications: applications,
+            totalApplications: applications.length
+        }));
 
     } catch (error) {
-        output.setContent(JSON.stringify({
-            success: false,
-            error: 'Server error: ' + error.message
+        // Handle any errors
+        return output.setContent(JSON.stringify({
+            error: 'Server Error',
+            message: 'An unexpected error occurred: ' + error.message
         }));
-        return output;
     }
 }
 
-// ── Get All Data for a Student ────────────────────────────────
-function getAllData(email) {
-    var student = getStudentData(email);
+/**
+ * Format date for consistent display
+ * @param {Date|string} date - Date to format
+ * @returns {string} Formatted date string or empty string
+ */
+function formatDate(date) {
+    if (!date) return '';
 
-    if (!student.success) {
-        return student; // Return the error
-    }
-
-    var milestones = getMilestones(email);
-    var documents = getDocuments(email);
-
-    return {
-        success: true,
-        student: student.student,
-        milestones: milestones.milestones || [],
-        documents: documents.documents || []
-    };
-}
-
-// ── Get Student Profile ───────────────────────────────────────
-function getStudentData(email) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Students');
-
-    if (!sheet) {
-        return { success: false, error: 'Students sheet not found' };
-    }
-
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
-
-    // Find the email column index
-    var emailIdx = headers.indexOf('Email');
-    if (emailIdx === -1) {
-        return { success: false, error: 'Email column not found in Students sheet' };
-    }
-
-    // Search for the student
-    for (var i = 1; i < data.length; i++) {
-        if (data[i][emailIdx] && data[i][emailIdx].toString().toLowerCase().trim() === email) {
-            var student = {};
-            for (var j = 0; j < headers.length; j++) {
-                var key = headers[j].toString().trim();
-                var value = data[i][j];
-
-                // Format dates
-                if (value instanceof Date) {
-                    value = Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-                }
-
-                student[key] = value;
-            }
-            return { success: true, student: student };
+    try {
+        if (date instanceof Date) {
+            return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd');
         }
+        return date.toString();
+    } catch (e) {
+        return '';
     }
-
-    return {
-        success: false,
-        error: 'Student not found. Please contact EV Overseas to register your account.'
-    };
 }
 
-// ── Get Milestones ────────────────────────────────────────────
-function getMilestones(email) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Milestones');
-
-    if (!sheet) {
-        return { success: true, milestones: [] };
-    }
-
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
-    var emailIdx = headers.indexOf('Email');
-
-    if (emailIdx === -1) {
-        return { success: true, milestones: [] };
-    }
-
-    var milestones = [];
-    for (var i = 1; i < data.length; i++) {
-        if (data[i][emailIdx] && data[i][emailIdx].toString().toLowerCase().trim() === email) {
-            var milestone = {};
-            for (var j = 0; j < headers.length; j++) {
-                var key = headers[j].toString().trim();
-                var value = data[i][j];
-
-                if (value instanceof Date) {
-                    value = Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-                }
-
-                milestone[key] = value;
-            }
-            milestones.push(milestone);
-        }
-    }
-
-    // Sort by StepNumber
-    milestones.sort(function (a, b) {
-        return (parseInt(a.StepNumber) || 0) - (parseInt(b.StepNumber) || 0);
-    });
-
-    return { success: true, milestones: milestones };
-}
-
-// ── Get Documents ─────────────────────────────────────────────
-function getDocuments(email) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Documents');
-
-    if (!sheet) {
-        return { success: true, documents: [] };
-    }
-
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
-    var emailIdx = headers.indexOf('Email');
-
-    if (emailIdx === -1) {
-        return { success: true, documents: [] };
-    }
-
-    var documents = [];
-    for (var i = 1; i < data.length; i++) {
-        if (data[i][emailIdx] && data[i][emailIdx].toString().toLowerCase().trim() === email) {
-            var doc = {};
-            for (var j = 0; j < headers.length; j++) {
-                var key = headers[j].toString().trim();
-                var value = data[i][j];
-
-                if (value instanceof Date) {
-                    value = Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-                }
-
-                doc[key] = value;
-            }
-            documents.push(doc);
-        }
-    }
-
-    return { success: true, documents: documents };
-}
-
-// ── Utility: Test the script from the editor ──────────────────
-function testGetAll() {
-    var mockEvent = {
-        parameter: {
-            email: 'test@gmail.com',
-            action: 'getAll'
-        }
-    };
-
-    var result = doGet(mockEvent);
+/**
+ * Test function to verify the API works
+ * Run this in Apps Script editor to test
+ */
+function testAPI() {
+    const testEmail = 'mohibmulani@gmail.com'; // Replace with your test email
+    const result = doGet({ parameter: { email: testEmail } });
     Logger.log(result.getContent());
 }

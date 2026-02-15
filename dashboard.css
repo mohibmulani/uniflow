@@ -230,6 +230,96 @@
     flex-wrap: wrap;
 }
 
+/* ── Application Selector ────────────────────────────────── */
+.application-selector {
+    width: 100%;
+    background: var(--dash-surface);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--dash-shadow);
+}
+
+.app-selector-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dash-text-heading);
+}
+
+.app-selector-dropdown {
+    flex: 1;
+    min-width: 280px;
+    padding: 12px 16px;
+    background: var(--dash-surface-2);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius-sm);
+    color: var(--dash-text-heading);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--dash-transition);
+}
+
+.app-selector-dropdown:hover {
+    border-color: var(--dash-accent);
+    background: var(--dash-surface);
+}
+
+.app-selector-dropdown:focus {
+    outline: none;
+    border-color: var(--dash-accent);
+    box-shadow: 0 0 0 3px var(--dash-accent-glow);
+}
+
+.app-selector-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--dash-accent-glow);
+    color: var(--dash-accent);
+    border: 1px solid rgba(0, 180, 216, 0.2);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Single Application Badge (when only one app) */
+.single-app-badge {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.app-badge-icon {
+    font-size: 2rem;
+}
+
+.app-badge-university {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dash-text-heading);
+    margin-bottom: 4px;
+}
+
+.app-badge-meta {
+    font-size: 0.85rem;
+    color: var(--dash-text-muted);
+}
+
+
 .welcome-section h1 {
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(1.5rem, 3vw, 2rem);
@@ -611,6 +701,12 @@
     background: rgba(59, 130, 246, 0.08);
     color: var(--dash-info);
     border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.badge-cancelled {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--dash-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 /* ── Timeline ────────────────────────────────────────────── */

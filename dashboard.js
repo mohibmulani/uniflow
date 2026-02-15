@@ -1,12 +1,13 @@
 /**
  * ============================================================
- * EV OVERSEAS — Student Dashboard JavaScript
+ * EV OVERSEAS — Student Dashboard JavaScript (Multi-App)
  * ============================================================
  * 
  * Handles:
  * - Google Sign-In authentication
- * - Fetching student data from Google Apps Script
- * - Rendering dashboard UI components
+ * - Fetching student data with multiple applications
+ * - Application selector dropdown
+ * - Rendering dashboard UI for selected application
  * - Chart.js progress visualization
  */
 
@@ -28,6 +29,7 @@ const JOURNEY_STEPS = [
 // ── GLOBAL STATE ───────────────────────────────────────────
 let currentUser = null;
 let studentData = null;
+let currentApplicationIndex = 0;
 let progressChart = null;
 
 // ── INITIALIZATION ─────────────────────────────────────────
@@ -119,7 +121,7 @@ async function loadDashboard() {
     showLoadingScreen();
 
     try {
-        const url = `${APPS_SCRIPT_URL}?email=${encodeURIComponent(currentUser.email)}&action=getAll`;
+        const url = `${APPS_SCRIPT_URL}?email=${encodeURIComponent(currentUser.email)}`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -128,12 +130,18 @@ async function loadDashboard() {
 
         const data = await response.json();
 
+        if (data.error) {
+            showNotRegistered(data.message || data.error);
+            return;
+        }
+
         if (!data.success) {
-            showNotRegistered(data.error);
+            showNotRegistered(data.message || 'Unable to load your dashboard data.');
             return;
         }
 
         studentData = data;
+        currentApplicationIndex = 0;
         renderDashboard();
 
     } catch (error) {
@@ -192,6 +200,7 @@ function showNotRegistered(message) {
 function signOut() {
     currentUser = null;
     studentData = null;
+    currentApplicationIndex = 0;
 
     if (typeof google !== 'undefined' && google.accounts) {
         google.accounts.id.disableAutoSelect();
@@ -209,21 +218,10 @@ function signOut() {
 // ── RENDER DASHBOARD ───────────────────────────────────────
 function renderDashboard() {
     const student = studentData.student;
-    const milestones = studentData.milestones;
-    const documents = studentData.documents;
-    const currentStep = parseInt(student.CurrentStep) || 1;
-    const totalSteps = 6;
-    const progress = Math.round((currentStep / totalSteps) * 100);
+    const applications = studentData.applications;
 
     // ── Welcome Header
-    document.getElementById('welcomeName').textContent = `Welcome back, ${student.Name || currentUser.given_name || 'Student'}!`;
-
-    // Build meta badges
-    const metaHtml = [];
-    if (student.University) metaHtml.push(`<span class="meta-badge">🎓 ${student.University}</span>`);
-    if (student.Destination) metaHtml.push(`<span class="meta-badge">🌍 ${student.Destination}</span>`);
-    if (student.Intake) metaHtml.push(`<span class="meta-badge">📅 ${student.Intake}</span>`);
-    document.getElementById('welcomeMeta').innerHTML = metaHtml.join('');
+    document.getElementById('welcomeName').textContent = `Welcome back, ${student.name || currentUser.given_name || 'Student'}!`;
 
     // User avatar
     const avatar = document.getElementById('userAvatar');
@@ -232,33 +230,110 @@ function renderDashboard() {
         avatar.style.display = 'block';
     }
 
-    // ── Status Overview Cards
-    renderStatusCards(student, milestones, documents, currentStep, progress);
+    // ── Render Application Selector
+    renderApplicationSelector(applications);
 
-    // ── Progress Tracker
-    renderProgressTracker(currentStep, milestones, progress);
+    // ── Render the currently selected application
+    displayApplication(currentApplicationIndex);
 
-    // ── Progress Chart
-    renderProgressChart(currentStep, totalSteps);
-
-    // ── Documents
-    renderDocuments(documents);
-
-    // ── Timeline
-    renderTimeline(milestones, currentStep);
-
-    // ── Counselor Card
+    // ── Counselor Card (same for all applications)
     renderCounselor(student);
 
     // Show dashboard
     showDashboardScreen();
 }
 
+// ── Application Selector ───────────────────────────────────
+function renderApplicationSelector(applications) {
+    const header = document.querySelector('.dashboard-header');
+
+    // Check if selector already exists
+    let selectorDiv = document.getElementById('applicationSelector');
+
+    if (!selectorDiv) {
+        selectorDiv = document.createElement('div');
+        selectorDiv.id = 'applicationSelector';
+        selectorDiv.className = 'application-selector';
+        header.insertBefore(selectorDiv, header.firstChild);
+    }
+
+    if (applications.length === 1) {
+        // Only one application - show as badge, no selector
+        selectorDiv.innerHTML = `
+            <div class="single-app-badge">
+                <span class="app-badge-icon">🎓</span>
+                <div class="app-badge-info">
+                    <div class="app-badge-university">${applications[0].university}</div>
+                    <div class="app-badge-meta">${applications[0].country} • ${applications[0].intake}</div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Multiple applications - show selector
+        selectorDiv.innerHTML = `
+            <label for="appSelector" class="app-selector-label">
+                <span>📚</span> Select Application:
+            </label>
+            <select id="appSelector" class="app-selector-dropdown">
+                ${applications.map((app, index) => `
+                    <option value="${index}" ${index === currentApplicationIndex ? 'selected' : ''}>
+                        ${app.university} - ${app.country} (${app.overallStatus})
+                    </option>
+                `).join('')}
+            </select>
+            <div class="app-selector-count">${applications.length} Applications</div>
+        `;
+
+        // Add event listener
+        const selector = document.getElementById('appSelector');
+        if (selector) {
+            selector.addEventListener('change', (e) => {
+                currentApplicationIndex = parseInt(e.target.value);
+                displayApplication(currentApplicationIndex);
+            });
+        }
+    }
+}
+
+// ── Display Selected Application ──────────────────────────
+function displayApplication(index) {
+    const app = studentData.applications[index];
+    const student = studentData.student;
+
+    // Update welcome meta badges
+    const metaHtml = [];
+    if (app.university) metaHtml.push(`<span class="meta-badge">🎓 ${app.university}</span>`);
+    if (app.country) metaHtml.push(`<span class="meta-badge">🌍 ${app.country}</span>`);
+    if (app.intake) metaHtml.push(`<span class="meta-badge">📅 ${app.intake}</span>`);
+    document.getElementById('welcomeMeta').innerHTML = metaHtml.join('');
+
+    const currentStep = parseInt(app.currentStep) || 1;
+    const totalSteps = 6;
+    const progress = Math.round((currentStep / totalSteps) * 100);
+
+    // ── Status Overview Cards
+    renderStatusCards(app, currentStep, progress);
+
+    // ── Progress Tracker
+    renderProgressTracker(currentStep, app.milestones, progress);
+
+    // ── Progress Chart
+    renderProgressChart(currentStep, totalSteps);
+
+    // ── Documents
+    renderDocuments(app.documents);
+
+    // ── Timeline
+    renderTimeline(app.milestones, currentStep);
+}
+
 // ── Status Cards ───────────────────────────────────────────
-function renderStatusCards(student, milestones, documents, currentStep, progress) {
-    const completedDocs = documents.filter(d =>
-        d.Status && (d.Status.toLowerCase() === 'approved' || d.Status.toLowerCase() === 'submitted')
-    ).length;
+function renderStatusCards(app, currentStep, progress) {
+    const completedDocs = app.documents ? app.documents.filter(d =>
+        d.status && (d.status.toLowerCase() === 'approved' || d.status.toLowerCase() === 'submitted')
+    ).length : 0;
+
+    const totalDocs = app.documents ? app.documents.length : 0;
 
     const container = document.getElementById('statusCards');
     container.innerHTML = `
@@ -275,13 +350,13 @@ function renderStatusCards(student, milestones, documents, currentStep, progress
         <div class="status-card fade-in stagger-3" style="--card-accent: var(--dash-warning);">
             <div class="status-card-icon">📄</div>
             <div class="status-card-label">Documents</div>
-            <div class="status-card-value">${completedDocs} / ${documents.length}</div>
+            <div class="status-card-value">${completedDocs} / ${totalDocs}</div>
         </div>
-        <div class="status-card fade-in stagger-4" style="--card-accent: ${getStatusColor(student.OverallStatus)};">
-            <div class="status-card-icon">${getStatusIcon(student.OverallStatus)}</div>
+        <div class="status-card fade-in stagger-4" style="--card-accent: ${getStatusColor(app.overallStatus)};">
+            <div class="status-card-icon">${getStatusIcon(app.overallStatus)}</div>
             <div class="status-card-label">Status</div>
             <div class="status-card-value">
-                <span class="badge badge-${getStatusBadgeClass(student.OverallStatus)}">${student.OverallStatus || 'Active'}</span>
+                <span class="badge badge-${getStatusBadgeClass(app.overallStatus)}">${app.overallStatus || 'Active'}</span>
             </div>
         </div>
     `;
@@ -305,8 +380,8 @@ function renderProgressTracker(currentStep, milestones, progress) {
         else if (step.number === currentStep) status = 'active';
 
         // Find milestone date
-        const milestone = milestones.find(m => parseInt(m.StepNumber) === step.number);
-        const dateStr = milestone && milestone.Date ? formatDate(milestone.Date) : '';
+        const milestone = milestones ? milestones.find(m => parseInt(m.stepNumber) === step.number) : null;
+        const dateStr = milestone && milestone.date ? formatDate(milestone.date) : '';
 
         return `
             <div class="step-item ${status}">
@@ -404,19 +479,19 @@ function renderDocuments(documents) {
     }
 
     container.innerHTML = documents.map(doc => {
-        const statusClass = getDocStatusClass(doc.Status);
-        const icon = getDocIcon(doc.DocumentName);
+        const statusClass = getDocStatusClass(doc.status);
+        const icon = getDocIcon(doc.name);
 
         return `
             <div class="doc-item">
                 <div class="doc-info">
                     <span class="doc-icon">${icon}</span>
                     <div>
-                        <div class="doc-name">${doc.DocumentName}</div>
-                        ${doc.SubmittedDate ? `<div class="doc-date">${formatDate(doc.SubmittedDate)}</div>` : ''}
+                        <div class="doc-name">${doc.name}</div>
+                        ${doc.submittedDate ? `<div class="doc-date">${formatDate(doc.submittedDate)}</div>` : ''}
                     </div>
                 </div>
-                <span class="badge badge-${statusClass}">${doc.Status}</span>
+                <span class="badge badge-${statusClass}">${doc.status}</span>
             </div>
         `;
     }).join('');
@@ -427,29 +502,29 @@ function renderTimeline(milestones, currentStep) {
     const container = document.getElementById('timelineContainer');
 
     // If no milestones, generate from journey steps
-    const items = milestones.length > 0 ? milestones : JOURNEY_STEPS.map(s => ({
-        StepNumber: s.number,
-        StepName: s.name,
-        Status: s.number < currentStep ? 'Completed' : (s.number === currentStep ? 'In Progress' : 'Pending'),
-        Date: '',
-        Notes: ''
+    const items = (milestones && milestones.length > 0) ? milestones : JOURNEY_STEPS.map(s => ({
+        stepNumber: s.number,
+        stepName: s.name,
+        status: s.number < currentStep ? 'Completed' : (s.number === currentStep ? 'In Progress' : 'Pending'),
+        date: '',
+        notes: ''
     }));
 
     container.innerHTML = items.map(item => {
-        const stepNum = parseInt(item.StepNumber) || 0;
+        const stepNum = parseInt(item.stepNumber) || 0;
         let status = 'pending';
-        if (item.Status && item.Status.toLowerCase() === 'completed') status = 'completed';
-        else if (item.Status && item.Status.toLowerCase() === 'in progress') status = 'active';
+        if (item.status && item.status.toLowerCase() === 'completed') status = 'completed';
+        else if (item.status && item.status.toLowerCase() === 'in progress') status = 'active';
         else if (stepNum < currentStep) status = 'completed';
         else if (stepNum === currentStep) status = 'active';
 
         return `
             <div class="timeline-item ${status}">
                 <div class="timeline-dot"></div>
-                <div class="timeline-title">${item.StepName}</div>
-                ${item.Date ? `<div class="timeline-meta">📅 ${formatDate(item.Date)}</div>` : ''}
-                <span class="badge badge-${status === 'completed' ? 'approved' : (status === 'active' ? 'submitted' : 'pending')}" style="margin-top: 4px;">${item.Status || (status === 'completed' ? 'Completed' : (status === 'active' ? 'In Progress' : 'Pending'))}</span>
-                ${item.Notes ? `<div class="timeline-notes">"${item.Notes}"</div>` : ''}
+                <div class="timeline-title">${item.stepName}</div>
+                ${item.date ? `<div class="timeline-meta">📅 ${formatDate(item.date)}</div>` : ''}
+                <span class="badge badge-${status === 'completed' ? 'approved' : (status === 'active' ? 'submitted' : 'pending')}" style="margin-top: 4px;">${item.status || (status === 'completed' ? 'Completed' : (status === 'active' ? 'In Progress' : 'Pending'))}</span>
+                ${item.notes ? `<div class="timeline-notes">"${item.notes}"</div>` : ''}
             </div>
         `;
     }).join('');
@@ -459,9 +534,15 @@ function renderTimeline(milestones, currentStep) {
 function renderCounselor(student) {
     const container = document.getElementById('counselorContainer');
 
-    const name = student.CounselorName || 'EV Overseas Team';
-    const email = student.CounselorEmail || 'info@evoverseas.com';
+    const name = student.counselorName || 'EV Overseas Team';
+    const email = student.counselorEmail || 'info@evoverseas.com';
+    const phone = student.counselorPhone || '+919666963756';
     const initials = name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
+
+    // Format phone for display (remove + and spaces for cleaner look)
+    const phoneDisplay = phone.replace(/[\s-]/g, '');
+    // Format phone for WhatsApp (ensure it starts with country code, no + or spaces)
+    const whatsappPhone = phoneDisplay.replace(/^\+/, '');
 
     container.innerHTML = `
         <div class="counselor-card">
@@ -469,19 +550,19 @@ function renderCounselor(student) {
             <div class="counselor-info">
                 <h3>${name}</h3>
                 <p>Your Dedicated Counselor</p>
-                <p style="font-size: 0.78rem; color: var(--dash-accent);">${email}</p>
+                <p style="font-size: 0.78rem; color: var(--dash-accent);">${phoneDisplay}</p>
             </div>
         </div>
         <div class="quick-actions">
-            <a href="https://wa.me/919666963756?text=Hi, I'm ${encodeURIComponent(student.Name || 'a student')} and I have a query about my application." 
+            <a href="https://wa.me/${whatsappPhone}?text=Hi, I'm ${encodeURIComponent(student.name || 'a student')} and I have a query about my application." 
                class="action-btn action-btn-whatsapp" target="_blank" rel="noopener">
                 💬 WhatsApp
             </a>
-            <a href="mailto:${email}?subject=Application Query - ${student.Name || 'Student'}" 
+            <a href="mailto:${email}?subject=Application Query - ${student.name || 'Student'}" 
                class="action-btn action-btn-email">
                 ✉️ Email
             </a>
-            <a href="tel:+919666963756" class="action-btn action-btn-call">
+            <a href="tel:${phoneDisplay}" class="action-btn action-btn-call">
                 📞 Call
             </a>
             <a href="index.html" class="action-btn action-btn-website">
@@ -496,8 +577,19 @@ function renderCounselor(student) {
 function formatDate(dateStr) {
     if (!dateStr) return '';
     try {
-        const date = new Date(dateStr);
+        let date;
+
+        // Check if it's in dd-mm-yyyy format (e.g., "15-01-2026")
+        if (typeof dateStr === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+            const [day, month, year] = dateStr.split('-');
+            // Create date as yyyy-mm-dd for proper parsing
+            date = new Date(`${year}-${month}-${day}`);
+        } else {
+            date = new Date(dateStr);
+        }
+
         if (isNaN(date.getTime())) return dateStr;
+
         return date.toLocaleDateString('en-IN', {
             day: 'numeric',
             month: 'short',
@@ -514,6 +606,7 @@ function getStatusColor(status) {
         case 'active': return 'var(--dash-success)';
         case 'completed': return 'var(--dash-info)';
         case 'on hold': return 'var(--dash-warning)';
+        case 'cancelled': return '#EF4444';
         default: return 'var(--dash-success)';
     }
 }
@@ -524,6 +617,7 @@ function getStatusIcon(status) {
         case 'active': return '✅';
         case 'completed': return '🎉';
         case 'on hold': return '⏸️';
+        case 'cancelled': return '❌';
         default: return '✅';
     }
 }
@@ -534,6 +628,7 @@ function getStatusBadgeClass(status) {
         case 'active': return 'active';
         case 'completed': return 'completed';
         case 'on hold': return 'on-hold';
+        case 'cancelled': return 'cancelled';
         default: return 'active';
     }
 }
