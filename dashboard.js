@@ -536,7 +536,7 @@ function renderCounselor(student) {
 
     const name = student.counselorName || 'EV Overseas Team';
     const email = student.counselorEmail || 'info@evoverseas.com';
-    const phone = student.counselorPhone || '+919666963756';
+    const phone = (student.counselorPhone || '+919666963756').toString();
     const initials = name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
 
     // Format phone for display (remove + and spaces for cleaner look)
