@@ -1489,8 +1489,7 @@ body.banner-visible .hero {
 /* Clean Section Headers */
 .section-header {
   text-align: center;
-  margin-bottom: 24px;
-  /* Compressed */
+  margin-bottom: 20px;
   max-width: 700px;
   margin-left: auto;
   margin-right: auto;
@@ -1520,7 +1519,7 @@ body.banner-visible .hero {
 }
 
 .section-header h2 {
-  margin-bottom: var(--space-16);
+  margin-bottom: 10px;
 }
 
 .section-header p {
@@ -1530,7 +1529,7 @@ body.banner-visible .hero {
 
 /* About Section */
 .about {
-  padding: 80px 0;
+  padding: 50px 0;
   background: var(--color-background);
 }
 
@@ -1654,7 +1653,7 @@ body.banner-visible .hero {
 
 @media (min-width: 768px) {
   .services {
-    padding: 60px 0;
+    padding: 48px 0;
   }
 
   .services-grid {
@@ -1669,7 +1668,7 @@ body.banner-visible .hero {
 
 @media (min-width: 1024px) {
   .services {
-    padding: 80px 0;
+    padding: 60px 0;
   }
 }
 
@@ -1777,13 +1776,13 @@ body.banner-visible .hero {
 
 @media (min-width: 768px) {
   .destinations {
-    padding: 60px 0;
+    padding: 48px 0;
   }
 }
 
 @media (min-width: 1024px) {
   .destinations {
-    padding: 80px 0;
+    padding: 60px 0;
   }
 
   .destinations-grid {
@@ -1873,7 +1872,7 @@ body.banner-visible .hero {
 
 @media (min-width: 768px) {
   .testimonials {
-    padding: 60px 0;
+    padding: 48px 0;
   }
 
   .testimonials-grid {
@@ -1888,13 +1887,13 @@ body.banner-visible .hero {
 
 @media (min-width: 1024px) {
   .testimonials {
-    padding: 80px 0;
+    padding: 60px 0;
   }
 }
 
 /* Blog Section */
 .blog {
-  padding: 60px 0;
+  padding: 40px 0;
   background: var(--color-white);
 }
 
@@ -1955,7 +1954,7 @@ body.banner-visible .hero {
 
 /* Journey Section */
 .journey {
-  padding: 60px 0;
+  padding: 40px 0;
   background: var(--color-background-alt);
 }
 
@@ -2120,7 +2119,7 @@ body.banner-visible .hero {
 
 @media (min-width: 768px) {
   .faq {
-    padding: 60px 0;
+    padding: 48px 0;
   }
 
   .faq-grid {
@@ -2135,7 +2134,7 @@ body.banner-visible .hero {
 
 @media (min-width: 1024px) {
   .faq {
-    padding: 80px 0;
+    padding: 60px 0;
   }
 
   .faq-grid {
@@ -3576,6 +3575,13 @@ section[id] {
    MOBILE BASE STYLES (Default < 768px)
    ============================================ */
 
+/* Mobile: override header height to match smaller navbar */
+@media (max-width: 767px) {
+  :root {
+    --header-height: 64px;
+  }
+}
+
 /* Enhanced Container for Mobile */
 .container {
   padding-left: 16px;
@@ -4777,7 +4783,7 @@ button,
 /* Glass Box Process Section */
 .glass-box {
   background: var(--color-white);
-  padding: 100px 0;
+  padding: 50px 0;
   position: relative;
   overflow: hidden;
 }
@@ -4795,8 +4801,8 @@ button,
 .glass-box-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  margin-top: 60px;
+  gap: 30px;
+  margin-top: 30px;
 }
 
 .glass-box-card {
@@ -4861,7 +4867,7 @@ button,
 /* Comparison Table Section */
 .comparison-section {
   background: var(--color-gray-50);
-  padding: 100px 0;
+  padding: 50px 0;
 }
 
 .comparison-table {

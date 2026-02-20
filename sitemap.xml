@@ -5,89 +5,33 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-    <!-- EV Overseas Main Pages -->
+    <!-- Homepage — Primary landing page targeting "study abroad consultancy Hyderabad" -->
     <url>
         <loc>https://evoverseas.com/</loc>
-        <lastmod>2026-02-03</lastmod>
+        <lastmod>2026-02-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
         <image:image>
             <image:loc>https://evoverseas.com/images/logo.png</image:loc>
-            <image:title>EV Overseas - Transparent Study Abroad Consulting</image:title>
+            <image:title>EV Overseas - Transparent Study Abroad Consultancy in Hyderabad</image:title>
+            <image:caption>EV Overseas logo - Best overseas education consultants in Hyderabad offering transparent study abroad services</image:caption>
         </image:image>
     </url>
 
-    <!-- Section Anchors for Better Indexing -->
-    <url>
-        <loc>https://evoverseas.com/#services</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#glass-box</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#comparison</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#destinations</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#testimonials</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#faq</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#contact</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://evoverseas.com/#about</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <!-- Blog (External) -->
-    <url>
-        <loc>https://blog.evoverseas.com/</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <!-- Student Dashboard -->
+    <!-- Student Dashboard — Authenticated student portal -->
     <url>
         <loc>https://evoverseas.com/dashboard.html</loc>
-        <lastmod>2026-02-10</lastmod>
+        <lastmod>2026-02-20</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
+    </url>
+
+    <!-- Blog — External blog for content marketing and organic traffic -->
+    <url>
+        <loc>https://blog.evoverseas.com/</loc>
+        <lastmod>2026-02-20</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
     </url>
 
 </urlset>

@@ -3,18 +3,16 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
+# Sitemap
 Sitemap: https://evoverseas.com/sitemap.xml
 
-# Block search engines from indexing admin or test pages
+# Block non-public paths
 Disallow: /admin/
 Disallow: /test/
-Disallow: /*.json$
+Disallow: /.git/
+Disallow: /google-apps-script.js
 
-# Allow all crawlers to access main content
+# Allow static assets
 Allow: /images/
-Allow: /css/
-Allow: /js/
-
-# Crawl delay (optional, helps prevent server overload)
-Crawl-delay: 1
+Allow: /style.css
+Allow: /script.js
